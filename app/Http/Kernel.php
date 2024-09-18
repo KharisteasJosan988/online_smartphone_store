@@ -10,6 +10,7 @@ class Kernel extends HttpKernel
     protected $middleware = [
         // Daftar middleware global
         \Illuminate\Foundation\Http\Middleware\CheckForMaintenanceMode::class,
+        \App\Http\Middleware\CalculateCartTotal::class,
     ];
 
     protected $middlewareGroups = [
@@ -28,6 +29,11 @@ class Kernel extends HttpKernel
         ],
     ];
 
+    protected $commands = [
+        \App\Console\Commands\UpdateOrderStatus::class,
+    ];
+
+
     protected $routeMiddleware = [
         'auth' => \App\Http\Middleware\Authenticate::class,
         'auth.basic' => \Illuminate\Auth\Middleware\AuthenticateWithBasicAuth::class,
@@ -35,6 +41,7 @@ class Kernel extends HttpKernel
         'can' => \Illuminate\Auth\Middleware\Authorize::class,
         'guest' => \App\Http\Middleware\RedirectIfAuthenticated::class,
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
-        // 'role' => \App\Http\Middleware\CheckRole::class, // Pastikan ini ditambahkan
+        'admin' => \App\Http\Middleware\AdminMiddleware::class,
+        'customer' => \App\Http\Middleware\CustomerMiddleware::class,
     ];
 }

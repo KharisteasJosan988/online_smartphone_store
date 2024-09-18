@@ -25,11 +25,11 @@
                 <div class="form-group">
                     <label for="price">Harga Produk</label>
                     <div class="input-group">
-                        <input type="number" name="price" class="form-control @error('price') is-invalid @enderror"
-                            id="price" value="{{ old('price') }}" placeholder="Masukkan Harga Produk">
                         <div class="input-group-append">
                             <span class="input-group-text">Rp</span>
                         </div>
+                        <input type="number" name="price" class="form-control @error('price') is-invalid @enderror"
+                            id="price" value="{{ old('price') }}" placeholder="Masukkan Harga Produk">
                         @error('price')
                             <span class="invalid-feedback">{{ $message }}</span>
                         @enderror
@@ -78,22 +78,32 @@
                         </div>
                     </div>
                     {{-- Storage Produk --}}
-                    <div class="form-group">
-                        <label for="storage">Storage Produk</label>
-                        <input type="text" name="storage" class="form-control @error('storage') is-invalid @enderror"
-                            id="storage" value="{{ old('storage') }}" placeholder="Masukkan Storage Produk">
-                        @error('storage')
-                            <span class="invalid-feedback">{{ $message }}</span>
-                        @enderror
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label for="storage">Storage Produk</label>
+                            <div class="input-group">
+                                <input type="text" name="storage"
+                                    class="form-control @error('storage') is-invalid @enderror" id="storage"
+                                    value="{{ old('storage') }}" placeholder="Masukkan Storage Produk">
+                                <div class="input-group-append">
+                                    <span class="input-group-text">GB</span>
+                                </div>
+                                @error('storage')
+                                    <span class="invalid-feedback">{{ $message }}</span>
+                                @enderror
+                            </div>
+                        </div>
                     </div>
                     {{-- Gambar Produk --}}
-                    <div class="form-group">
-                        <label for="image">Gambar Produk</label>
-                        <input type="file" name="image" class="form-control @error('image') is-invalid @enderror"
-                            id="image">
-                        @error('image')
-                            <span class="invalid-feedback">{{ $message }}</span>
-                        @enderror
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="image">Gambar Produk</label>
+                            <input type="file" name="image" class="form-control @error('image') is-invalid @enderror"
+                                id="image">
+                            @error('image')
+                                <span class="invalid-feedback">{{ $message }}</span>
+                            @enderror
+                        </div>
                     </div>
                 </div>
 

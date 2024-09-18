@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+{{-- <!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -10,22 +10,34 @@
 
 <body>
     <h1>Cek Harga Ongkir</h1>
-    <form action="" method="POST">
+    <form action="{{ route('cek-ongkir') }}" method="POST">
         @csrf
         <p>
+            Provinsi Asal
+            <select name="province_asal" id="province_asal">
+                @foreach ($provinces as $province)
+                    <option value="{{ $province->province_id }}">{{ $province->province }}</option>
+                @endforeach
+            </select>
+        </p>
+        <p>
             Kota Asal
-            <select name="id_kota_asal" id="">
-                @foreach ($cities as $city)
-                    <option value="{{ $city->city_id }}">{{ $city->city_name }}</option>
+            <select name="id_kota_asal" id="city_asal">
+                <option>Pilih Kota Asal</option>
+            </select>
+        </p>
+        <p>
+            Provinsi Tujuan
+            <select name="province_tujuan" id="province_tujuan">
+                @foreach ($provinces as $province)
+                    <option value="{{ $province->province_id }}">{{ $province->province }}</option>
                 @endforeach
             </select>
         </p>
         <p>
             Kota Tujuan
-            <select name="id_kota_tujuan" id="">
-                @foreach ($cities as $city)
-                    <option value="{{ $city->city_id }}">{{ $city->city_name }}</option>
-                @endforeach
+            <select name="id_kota_tujuan" id="city_tujuan">
+                <option>Pilih Kota Tujuan</option>
             </select>
         </p>
         <p>
@@ -38,11 +50,43 @@
         </p>
         <p>
             Berat Barang (gram) <br>
-            <input type="number" min="1" name="berat" id="">
+            <input type="number" min="1" name="berat" id="" required>
         </p>
+
         <button type="submit">Cek Ongkir</button>
     </form>
 
+
+    <script>
+        document.getElementById('province_asal').addEventListener('change', function() {
+            var provinceId = this.value;
+            fetch(`/ro/get-cities/${provinceId}`)
+                .then(response => response.json())
+                .then(data => {
+                    var citySelect = document.getElementById('city_asal');
+                    citySelect.innerHTML = '';
+                    data.forEach(function(city) {
+                        citySelect.innerHTML +=
+                            `<option value="${city.city_id}">${city.city_name}</option>`;
+                    });
+                });
+        });
+
+        document.getElementById('province_tujuan').addEventListener('change', function() {
+            var provinceId = this.value;
+            fetch(`/ro/get-cities/${provinceId}`)
+                .then(response => response.json())
+                .then(data => {
+                    var citySelect = document.getElementById('city_tujuan');
+                    citySelect.innerHTML = '';
+                    data.forEach(function(city) {
+                        citySelect.innerHTML +=
+                            `<option value="${city.city_id}">${city.city_name}</option>`;
+                    });
+                });
+        });
+    </script>
+
 </body>
 
-</html>
+</html> --}}

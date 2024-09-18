@@ -12,32 +12,51 @@ class Order extends Model
     use HasFactory;
 
     protected $fillable = [
-        'no_pesanan',
-        'total_jumlah',
-        'metode_pembayaran',
-        'alamat_pengiriman',
         'user_id',
-        'kurir_id',
+        'courier_id',
+        'no_pesanan',
+        'alamat_pengiriman',
+        'metode_pembayaran',
+        'total_jumlah',
+        'shipping_cost',
+        'estimated_delivery',
         'status',
+        'courier', // Nama kurir sebagai string
     ];
 
+    protected $casts = [
+        'estimated_delivery' => 'datetime', // Konversi otomatis ke objek Carbon
+    ];
+
+
+    /**
+     * Relasi ke User
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    public function courier(): BelongsTo
+    /**
+     * Relasi ke Courier
+     */
+    public function courier()
     {
-        return $this->belongsTo(Courier::class);
+        return $this->belongsTo(Courier::class, 'courier_id');
     }
 
+    /**
+     * Relasi ke OrderItem
+     */
     public function orderItems(): HasMany
     {
         return $this->hasMany(OrderItem::class);
     }
 
-    public function payment(): HasMany
+    public function getFormattedEstimatedDeliveryAttribute()
     {
-        return $this->hasMany(Payment::class);
+        return $this->estimated_delivery
+            ? $this->estimated_delivery->format('d-m-Y')
+            : 'Belum tersedia';
     }
 }

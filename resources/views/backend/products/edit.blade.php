@@ -5,6 +5,17 @@
 @section('page-title', 'Edit Produk')
 
 @section('content')
+    @if (session('success'))
+        <div class="alert alert-success">
+            {{ session('success') }}
+        </div>
+    @endif
+
+    @if (session('error'))
+        <div class="alert alert-danger">
+            {{ session('error') }}
+        </div>
+    @endif
     <div class="card">
         <div class="card-header">
             <h3 class="card-title">Form Edit Produk</h3>
@@ -28,11 +39,11 @@
                 <div class="form-group">
                     <label for="price">Harga Produk</label>
                     <div class="input-group">
-                        <input type="number" name="price" class="form-control @error('price') is-invalid @enderror"
-                            id="price" value="{{ old('price', $product->price) }}" placeholder="Masukkan Harga Produk">
                         <div class="input-group-append">
                             <span class="input-group-text">Rp</span>
                         </div>
+                        <input type="text" name="price" class="form-control @error('price') is-invalid @enderror"
+                            id="price" value="{{ old('price', $product->price) }}" placeholder="Masukkan Harga Produk">
                         @error('price')
                             <span class="invalid-feedback">{{ $message }}</span>
                         @enderror

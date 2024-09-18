@@ -53,10 +53,6 @@
                         <!-- /.col -->
                     </div>
                 </form>
-
-                <p class="mt-2 mb-1 text-center">
-                    <a href="#">I forgot my password</a>
-                </p>
             </div>
             <!-- /.login-card-body -->
         </div>

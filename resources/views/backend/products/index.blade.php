@@ -5,6 +5,17 @@
 @section('page-title', 'Daftar Produk')
 
 @section('content')
+    @if (session('success'))
+        <div class="alert alert-success">
+            {{ session('success') }}
+        </div>
+    @endif
+
+    @if (session('error'))
+        <div class="alert alert-danger">
+            {{ session('error') }}
+        </div>
+    @endif
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
             <a href="{{ route('products.create') }}" class="btn btn-info btn-lg fas fa-plus"> Tambah Produk</a>
@@ -24,6 +35,8 @@
                             <th>Stok</th>
                             <th>Merk</th>
                             <th>Warna</th>
+                            <th>Penyimpanan</th>
+                            <th>Gambar</th>
                             <th>Aksi</th>
                         </tr>
                     </thead>
@@ -38,6 +51,15 @@
                                 <td>{{ $product->stock }}</td>
                                 <td>{{ $product->merk }}</td>
                                 <td>{{ $product->color }}</td>
+                                <td>{{ $product->storage }}</td>
+                                <td>
+                                    @if ($product->image)
+                                        <img src="{{ asset('storage/' . $product->image) }}" alt="Product Image"
+                                            style="width: 100px; height: 100px; object-fit: cover;">
+                                    @else
+                                        <span>No Image</span>
+                                    @endif
+                                </td>
                                 <td>
                                     <a href="{{ route('products.edit', $product->id) }}"
                                         class="btn btn-warning btn-sm fas fa-edit"></a>

@@ -22,9 +22,15 @@ class ProductFactory extends Factory
             'stock' => $this->faker->numberBetween(1, 100),
             'merk' => $this->faker->company(),
             'color' => $this->faker->colorName(),
-            'storage' => $this->faker->randomElement(['64GB', '128GB', '256GB']),
+            'storage' => $this->faker->randomElement([
+                '64GB',
+                '128GB',
+                '256GB'
+            ]),
             'image' => $this->faker->imageUrl(640, 480, 'smartphone'),
-            'category_id' => Category::factory(), // Mengambil category dari CategoryFactory
+
+            // Ambil kategori yang sudah ada
+            'category_id' => Category::inRandomOrder()->first()->id,
         ];
     }
 }

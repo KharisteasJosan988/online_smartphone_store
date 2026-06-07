@@ -647,48 +647,59 @@
                         city_id,
                         destination,
                         weight,
-                        courier_id: courierId, // Menggunakan courier_id langsung
+                        courier_id: courierId,
                     }),
                 })
                 .then((response) => response.json())
                 .then((data) => {
-                    console.log(data); // Debug data API
-                    if (data.success && data.results.length > 0) {
-                        const ongkos = data.results[0].costs[0].cost[0].value;
-                        console.log("Ongkos kirim:", ongkos); // Debug
+                    console.log("Response API:", data);
 
-                        document.getElementById('hidden-shipping-cost').value = ongkos;
+                    console.log("results =", data.results);
 
-                        const subtotal = parseInt(
-                            '{{ $totalPrice }}'); // Pastikan subtotal diambil dengan benar
-                        const total = subtotal + ongkos;
+                    const ongkos = data.results[0].costs[0].cost[0].value;
 
-                        console.log('Subtotal:', subtotal, 'Total:', total);
+                    console.log("ONGKOS =", ongkos);
 
-                        // Update tampilan ongkos kirim dan total
-                        document.getElementById('ongkos-kirim').innerText =
-                            `Rp${ongkos.toLocaleString('id-ID')}`;
-                        document.getElementById('total-price').innerText = `Rp${total.toLocaleString('id-ID')}`;
+                    document.getElementById('hidden-shipping-cost').value = ongkos;
 
-                        // Simpan nilai untuk submit final
-                        document.getElementById('hidden-total').value = total;
-                    } else {
-                        console.error('Error:', data);
-                        alert('Ongkos kirim tidak ditemukan! Periksa input atau coba kurir lain.');
-                    }
+                    console.log(
+                        "hidden value =",
+                        document.getElementById('hidden-shipping-cost').value
+                    );
+
+                    // UPDATE TAMPILAN ONGKIR
+                    document.getElementById('ongkos-kirim').innerText =
+                        'Rp' + ongkos.toLocaleString('id-ID');
+
+                    // UPDATE TOTAL
+                    const subtotal = {{ $totalPrice }};
+                    const total = subtotal + ongkos;
+
+                    document.getElementById('total-price').innerText =
+                        'Rp' + total.toLocaleString('id-ID');
+
+                    document.getElementById('hidden-total').value = total;
                 })
                 .catch((error) => {
-                    console.error('Error:', error);
-                    alert('Gagal menghitung ongkos kirim.');
+                    console.error(error);
                 });
         });
 
 
         document.getElementById('order-now-button').addEventListener('click', async function() {
+            console.log("TOMBOL ORDER NOW DIKLIK");
             const address = document.getElementById('address')?.value;
             const paymentMethod = document.getElementById('payment_method')?.value;
             const courierId = document.getElementById('courier').value;
             const weight = document.getElementById('weight')?.value;
+            console.log(
+                "ONGKOS SAAT ORDER NOW =",
+                document.getElementById('hidden-shipping-cost')?.value
+            );
+            console.log(
+                "ISI HIDDEN SEBELUM PARSE =",
+                document.getElementById('hidden-shipping-cost')?.value
+            );
             const ongkos = parseInt(document.getElementById('hidden-shipping-cost')?.value || 0);
 
             if (!address) {
@@ -721,6 +732,14 @@
             console.log('Subtotal:', subtotal, 'Total:', total);
 
             try {
+                console.log("DATA YANG DIKIRIM", {
+                    address,
+                    payment_method: paymentMethod,
+                    courier_id: courierId,
+                    shipping_cost: ongkos,
+                    weight,
+                    total_jumlah: total,
+                });
                 const response = await fetch('/checkout/store', {
                     method: 'POST',
                     headers: {
@@ -740,7 +759,12 @@
                     }),
                 });
 
-                const result = await response.json();
+                const text = await response.text();
+
+                console.log("RAW RESPONSE STORE:");
+                console.log(text);
+
+                const result = JSON.parse(text);
 
                 if (response.ok) {
                     alert(result.message);

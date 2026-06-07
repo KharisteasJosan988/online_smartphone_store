@@ -19,8 +19,8 @@ class CategoryFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => $this->faker->unique()->word(),  // Menggunakan unique() untuk memastikan nama unik
-            'description' => $this->faker->sentence(),
+            'name' => fake()->unique()->word(),  // Menggunakan unique() untuk memastikan nama unik
+            'description' => fake()->sentence(),
         ];
     }
 }

@@ -12,8 +12,11 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('orders', function (Blueprint $table) {
-            if (!Schema::hasColumn('orders', 'courier')) {
+            if (!Schema::hasColumn('orders', 'shipping_cost')) {
                 $table->integer('shipping_cost')->default(0)->after('total_jumlah');
+            }
+
+            if (!Schema::hasColumn('orders', 'courier')) {
                 $table->string('courier')->nullable()->after('shipping_cost');
             }
         });

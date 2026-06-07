@@ -22,7 +22,7 @@
 
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="{{ asset('vendor/fontawesome-free/css/all.css') }}">
-    <link rel="stylesheet" href="{{ asset('vendor/bootstrap/js/bootstrap.bundle.js') }}">
+    {{-- <link rel="stylesheet" href="{{ asset('vendor/bootstrap/js/bootstrap.bundle.js') }}"> --}}
     <!-- overlayScrollbars -->
     <link rel="stylesheet"
         href="{{ asset('vendor/adminlte/plugins/overlayScrollbars/css/OverlayScrollbars.min.css') }}">
@@ -344,10 +344,8 @@
         </aside>
         <!-- /.control-sidebar -->
 
-
     </div>
     <!-- ./wrapper -->
-
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <!-- Bootstrap Bundle (with Popper.js for Bootstrap) -->

@@ -13,36 +13,53 @@ class ProvinceCitySeeder extends Seeder
      */
     public function run(): void
     {
-        // Ambil data provinsi dari API
-        $responseProvince = Http::withHeaders(['key' => env('RAJAONGKIR_API_KEY')])
-            ->get(env('RAJAONGKIR_BASEURL') . '/province');
-
-        if ($responseProvince->successful()) {
-            $provinces = $responseProvince->json()['rajaongkir']['results'];
-            foreach ($provinces as $province) {
-                \DB::table('provinces')->updateOrInsert([
-                    'id' => $province['province_id'],
-                ], [
-                    'province' => $province['province'],
-                ]);
-            }
+        if (!env('RAJAONGKIR_API_KEY') || !env('RAJAONGKIR_BASEURL')) {
+            $this->command?->warn(
+                'RAJAONGKIR_API_KEY / RAJAONGKIR_BASEURL belum di-set, ' .
+                'melewati seeding provinsi & kota (fitur kalkulasi ongkir tidak akan berfungsi sampai di-set).'
+            );
+            return;
         }
 
-        // Ambil data kota dari API
-        $responseCity = Http::withHeaders(['key' => env('RAJAONGKIR_API_KEY')])
-            ->get(env('RAJAONGKIR_BASEURL') . '/city');
+        try {
+            // Ambil data provinsi dari API
+            $responseProvince = Http::timeout(10)
+                ->withHeaders(['key' => env('RAJAONGKIR_API_KEY')])
+                ->get(env('RAJAONGKIR_BASEURL') . '/province');
 
-        if ($responseCity->successful()) {
-            $cities = $responseCity->json()['rajaongkir']['results'];
-            foreach ($cities as $city) {
-                \DB::table('cities')->updateOrInsert([
-                    'id' => $city['city_id'],
-                ], [
-                    'city_name' => $city['city_name'],
-                    'type' => $city['type'],
-                    'province_id' => $city['province_id'],
-                ]);
+            if ($responseProvince->successful()) {
+                $provinces = $responseProvince->json()['rajaongkir']['results'] ?? [];
+                foreach ($provinces as $province) {
+                    \DB::table('provinces')->updateOrInsert([
+                        'id' => $province['province_id'],
+                    ], [
+                        'province' => $province['province'],
+                    ]);
+                }
             }
+
+            // Ambil data kota dari API
+            $responseCity = Http::timeout(10)
+                ->withHeaders(['key' => env('RAJAONGKIR_API_KEY')])
+                ->get(env('RAJAONGKIR_BASEURL') . '/city');
+
+            if ($responseCity->successful()) {
+                $cities = $responseCity->json()['rajaongkir']['results'] ?? [];
+                foreach ($cities as $city) {
+                    \DB::table('cities')->updateOrInsert([
+                        'id' => $city['city_id'],
+                    ], [
+                        'city_name' => $city['city_name'],
+                        'type' => $city['type'],
+                        'province_id' => $city['province_id'],
+                    ]);
+                }
+            }
+        } catch (\Throwable $e) {
+            $this->command?->warn(
+                'Gagal mengambil data provinsi/kota dari RajaOngkir API: ' . $e->getMessage() .
+                ' — dilewati, seeding lain tetap lanjut.'
+            );
         }
     }
 }

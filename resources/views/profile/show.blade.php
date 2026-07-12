@@ -265,7 +265,7 @@
                                 dengan harga terjangkau.</p>
                             <ul class="footer-links">
                                 <li><a href="#"><i class="fa fa-map-marker"></i>Jl UKRIM</a></li>
-                                <li><a href="#"><i class="fa fa-phone"></i>+6288902347912</a></li>
+                                <li><a href="#"><i class="fa fa-phone"></i>+6281234567890</a></li>
                                 <li><a href="#"><i class="fa fa-envelope-o"></i>a.semicolon.ppl@gmail.com</a>
                                 </li>
                             </ul>

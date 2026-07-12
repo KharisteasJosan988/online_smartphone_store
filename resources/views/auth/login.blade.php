@@ -62,6 +62,7 @@
                     <div class="card">
                         <div class="card-header text-center">
                             <h3>{{ __('Login') }}</h3>
+                            <h5>Email & Password : customer@example.com</h5>
                         </div>
                         <div class="card-body">
                             <form method="POST" action="{{ route('login') }}">

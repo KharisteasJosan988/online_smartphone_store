@@ -19,6 +19,7 @@ use App\Http\Controllers\SmartphoneController;
 use FontLib\Table\Type\name;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use App\Services\RajaOngkirService;
 
 Auth::routes(['verify' => true]);
 
@@ -58,7 +59,9 @@ Route::get('/customer-categories', [CustomerCategoryController::class, 'index'])
 Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
 Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add');
 Route::post('/cart/remove', [CartController::class, 'remove'])->name('cart.remove');
+
 Route::get('/cart/get-cities', [CartController::class, 'getCitiesByProvince']);
+Route::get('/cart/get-districts', [CartController::class, 'getDistrictsByCity']);
 
 // });
 

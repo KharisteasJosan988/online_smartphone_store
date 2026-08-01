@@ -21,6 +21,7 @@ class Product extends Model
         'color',
         'storage',
         'image',
+        'weight',
         'category_id',
     ];
 

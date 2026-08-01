@@ -11,8 +11,13 @@ class Courier extends Model
     use HasFactory;
 
     protected $fillable = [
+        'code',
         'name',
-        'no_telpon',
+        'is_active',
+    ];
+
+    protected $casts = [
+        'is_active' => 'boolean',
     ];
 
     public function orders(): HasMany

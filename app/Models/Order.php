@@ -21,7 +21,16 @@ class Order extends Model
         'shipping_cost',
         'estimated_delivery',
         'status',
-        'courier', // Nama kurir sebagai string
+        'courier',
+
+        'destination_province_id',
+        'destination_city_id',
+        'destination_district_id',
+
+        'shipping_courier_code',
+        'shipping_service',
+        'shipping_description',
+        'shipping_etd',
     ];
 
     protected $casts = [

@@ -34,6 +34,7 @@
                             <th>Deskripsi</th>
                             <th>Stok</th>
                             <th>Merk</th>
+                            <th>Berat (gram)</th>
                             <th>Warna</th>
                             <th>Penyimpanan</th>
                             <th>Gambar</th>
@@ -50,6 +51,7 @@
                                 <td>{{ $product->description }}</td>
                                 <td>{{ $product->stock }}</td>
                                 <td>{{ $product->merk }}</td>
+                                <td>{{ $product->weight }}</td>
                                 <td>{{ $product->color }}</td>
                                 <td>{{ $product->storage }}</td>
                                 <td>

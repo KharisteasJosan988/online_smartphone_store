@@ -22,7 +22,8 @@
         <!-- /.login-logo -->
         <div class="card">
             <div class="card-body login-card-body">
-                <p class="login-box-msg">Sign in to start your session</p>
+                <h4 class="login-box-msg">Sign in to start your session</h4>
+                <p class="login-box-msg">Email & Password : admin@example.com</p>
 
                 <form action="{{ route('admin.login.post') }}" method="POST">
                     @csrf

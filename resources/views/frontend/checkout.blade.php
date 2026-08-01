@@ -341,44 +341,47 @@
 
                             <!-- Pilih Provinsi -->
                             <div class="form-group">
-                                <select name="province" id="province" class="form-control" required>
-                                    <option value="">Pilih Asal Provinsi</option>
+                                <select name="province_id" id="province" class="form-control" required>
+                                    <option value="">Pilih Provinsi Tujuan</option>
                                     @foreach ($provinsi as $province)
-                                        <option value="{{ $province->id }}">{{ $province->province }}</option>
+                                        <option value="{{ $province['id'] }}">
+                                            {{ $province['name'] }}
+                                        </option>
                                     @endforeach
                                 </select>
                             </div>
 
                             <!-- Pilih Kota -->
                             <div class="form-group">
-                                <select name="city_id" id="city" class="form-control" required>
-                                    <option value="">Pilih Kota Asal</option>
+                                <select name="city_id" id="city" class="form-control" required disabled>
+                                    <option value="">Pilih Kota/Kabupaten Tujuan</option>
                                 </select>
                             </div>
 
-                            <!-- Kota Tujuan -->
+                            <!-- Pilih Kecamatan (districts) -->
                             <div class="form-group">
-                                <select name="destination" id="destination" class="form-control" required>
-                                    <option value="">Pilih Kota Tujuan</option>
-                                    @foreach ($cities as $city)
-                                        <option value="{{ $city->id }}">{{ $city->city_name }}</option>
-                                    @endforeach
+                                <select name="district_id" id="district" class="form-control" required disabled>
+                                    <option value="">Pilih Kecamatan Tujuan</option>
                                 </select>
                             </div>
-
+                            {{--
                             <!-- Berat Barang -->
                             <div class="form-group">
+                                <label for="weight">Berat Barang (gram)</label>
+
                                 <input type="number" name="weight" id="weight" class="form-control"
-                                    placeholder="Berat (gram)" required>
-                            </div>
+                                    min="1" placeholder="Contoh: 1000" required>
+                            </div> --}}
 
                             <!-- Pilih Kurir -->
                             <div class="form-group">
                                 <label for="courier">Pilih Kurir</label>
-                                <select name="courier_id" id="courier" class="form-control" required>
-                                    <option value="1">JNE</option>
-                                    <option value="2">POS</option>
-                                    <option value="3">TIKI</option>
+
+                                <select name="courier" id="courier" class="form-control" required>
+                                    <option value="">Pilih Kurir</option>
+                                    <option value="jne">JNE</option>
+                                    <option value="pos">POS Indonesia</option>
+                                    <option value="tiki">TIKI</option>
                                 </select>
                             </div>
 
@@ -452,6 +455,10 @@
                             <div><strong>Rp{{ number_format($totalPrice, 2, ',', '.') }}</strong></div>
                         </div>
                         <div class="order-col">
+                            <div><strong>Total Berat</strong></div>
+                            <div>{{ number_format($totalWeight) }} gram</div>
+                        </div>
+                        <div class="order-col">
                             <div><strong>Ongkos Kirim</strong></div>
                             <div id="ongkos-kirim">Rp0</div>
                         </div>
@@ -489,10 +496,13 @@
                                 </ul>
                             </div>
                         </div>
-                        <input type="hidden" id="courier-id" name="courier_id" value="{{ $courier->id ?? '' }}">
-                        <input type="hidden" name="weight" value="1000">
-                        <input type="hidden" name="shipping_cost" id="hidden-shipping-cost" value="0">
-                        <input type="hidden" name="total" id="hidden-total" value="{{ $totalPrice }}">
+                        <input type="hidden" id="selected-shipping-service" value="">
+                        <input type="hidden" id="selected-shipping-etd" value="">
+                        <input type="hidden" id="selected-shipping-description" value="">
+
+                        <input type="hidden" id="hidden-shipping-cost" value="0">
+                        <input type="hidden" id="hidden-total" value="{{ $totalPrice }}">
+                        <input type="hidden" id="weight" value="{{ $totalWeight }}">
                     </div>
 
                     <!-- Tombol Pesan -->
@@ -586,197 +596,437 @@
 
     <script>
         $(document).ready(function() {
+
+            // ================================
+            // PROVINCE -> CITY
+            // ================================
             $('#province').on('change', function() {
-                var provinceId = $(this).val();
 
-                // Kosongkan dropdown kota
-                $('#city').html('<option value="">Pilih Kota Asal</option>');
+                const provinceId = $(this).val();
 
-                if (provinceId) {
-                    // Panggil endpoint untuk mendapatkan data kota
-                    $.ajax({
-                        url: '/cart/get-cities',
-                        type: 'GET',
-                        data: {
-                            province_id: provinceId
-                        },
-                        success: function(response) {
-                            // Tambahkan data kota ke dropdown
-                            $.each(response, function(key, city) {
-                                $('#city').append('<option value="' + city.id + '">' +
-                                    city.city_name + '</option>');
-                            });
-                        },
-                        error: function() {
-                            alert('Gagal memuat data kota.');
-                        }
-                    });
+                // Reset city
+                $('#city')
+                    .html('<option value="">Memuat kota/kabupaten...</option>')
+                    .prop('disabled', true);
+
+                // Reset district
+                $('#district')
+                    .html('<option value="">Pilih Kecamatan Tujuan</option>')
+                    .prop('disabled', true);
+
+                if (!provinceId) {
+                    $('#city')
+                        .html('<option value="">Pilih Kota/Kabupaten Tujuan</option>');
+
+                    return;
                 }
+
+                $.ajax({
+                    url: '{{ url('/cart/get-cities') }}',
+                    type: 'GET',
+                    data: {
+                        province_id: provinceId
+                    },
+
+                    success: function(response) {
+
+                        $('#city')
+                            .html('<option value="">Pilih Kota/Kabupaten Tujuan</option>')
+                            .prop('disabled', false);
+
+                        $.each(response, function(key, city) {
+
+                            $('#city').append(
+                                $('<option>', {
+                                    value: city.id,
+                                    text: city.name
+                                })
+                            );
+
+                        });
+                    },
+
+                    error: function(xhr) {
+
+                        console.error('Gagal mengambil kota:', xhr.responseText);
+
+                        $('#city')
+                            .html('<option value="">Gagal memuat kota/kabupaten</option>')
+                            .prop('disabled', true);
+
+                        alert('Gagal mengambil data kota/kabupaten.');
+                    }
+                });
             });
+
+
+            // ================================
+            // CITY -> DISTRICT
+            // ================================
+            $('#city').on('change', function() {
+
+                const cityId = $(this).val();
+
+                // Reset district
+                $('#district')
+                    .html('<option value="">Memuat kecamatan...</option>')
+                    .prop('disabled', true);
+
+                if (!cityId) {
+
+                    $('#district')
+                        .html('<option value="">Pilih Kecamatan Tujuan</option>');
+
+                    return;
+                }
+
+                $.ajax({
+                    url: '{{ url('/cart/get-districts') }}',
+                    type: 'GET',
+                    data: {
+                        city_id: cityId
+                    },
+
+                    success: function(response) {
+
+                        $('#district')
+                            .html('<option value="">Pilih Kecamatan Tujuan</option>')
+                            .prop('disabled', false);
+
+                        $.each(response, function(key, district) {
+
+                            $('#district').append(
+                                $('<option>', {
+                                    value: district.id,
+                                    text: district.name
+                                })
+                            );
+
+                        });
+                    },
+
+                    error: function(xhr) {
+
+                        console.error(
+                            'Gagal mengambil kecamatan:',
+                            xhr.responseText
+                        );
+
+                        $('#district')
+                            .html('<option value="">Gagal memuat kecamatan</option>')
+                            .prop('disabled', true);
+
+                        alert('Gagal mengambil data kecamatan.');
+                    }
+                });
+            });
+
         });
     </script>
 
     <script>
-        document.getElementById('shipping-cost-form').addEventListener('submit', function(e) {
+        document.getElementById('shipping-cost-form').addEventListener('submit', async function(e) {
             e.preventDefault();
 
-            const city_id = document.getElementById('city').value;
-            const destination = document.getElementById('destination').value;
-            const weight = document.getElementById('weight').value;
-            const courierId = document.getElementById('courier').value;
+            const destination = document.getElementById('district').value;
+            const weight = parseInt(document.getElementById('weight').value);
+            const courier = document.getElementById('courier').value;
 
-            if (!city_id || !destination || !weight || !courierId) {
-                alert("Mohon lengkapi semua data!");
+            if (!destination) {
+                alert('Silakan pilih kecamatan tujuan.');
                 return;
             }
 
-            if (isNaN(weight) || weight <= 0) {
-                alert("Berat barang harus lebih dari 0 gram.");
+            if (!weight || weight <= 0) {
+                alert('Berat barang harus lebih dari 0 gram.');
                 return;
             }
 
+            if (!courier) {
+                alert('Silakan pilih kurir.');
+                return;
+            }
 
-            // Kirim permintaan menggunakan fetch
-            fetch('{{ route('shipping-cost') }}', {
+            try {
+                const response = await fetch('{{ route('shipping-cost') }}', {
                     method: 'POST',
                     headers: {
                         'X-CSRF-TOKEN': '{{ csrf_token() }}',
                         'Content-Type': 'application/json',
+                        'Accept': 'application/json',
                     },
                     body: JSON.stringify({
-                        city_id,
-                        destination,
-                        weight,
-                        courier_id: courierId,
+                        destination: destination,
+                        courier: courier,
                     }),
-                })
-                .then((response) => response.json())
-                .then((data) => {
-                    console.log("Response API:", data);
+                });
 
-                    console.log("results =", data.results);
+                const data = await response.json();
 
-                    const ongkos = data.results[0].costs[0].cost[0].value;
-
-                    console.log("ONGKOS =", ongkos);
-
-                    document.getElementById('hidden-shipping-cost').value = ongkos;
-
-                    console.log(
-                        "hidden value =",
-                        document.getElementById('hidden-shipping-cost').value
+                if (!response.ok || !data.success) {
+                    throw new Error(
+                        data.message || 'Gagal menghitung ongkos kirim.'
                     );
-
-                    // UPDATE TAMPILAN ONGKIR
-                    document.getElementById('ongkos-kirim').innerText =
-                        'Rp' + ongkos.toLocaleString('id-ID');
-
-                    // UPDATE TOTAL
-                    const subtotal = {{ $totalPrice }};
-                    const total = subtotal + ongkos;
-
-                    document.getElementById('total-price').innerText =
-                        'Rp' + total.toLocaleString('id-ID');
-
-                    document.getElementById('hidden-total').value = total;
-                })
-                .catch((error) => {
-                    console.error(error);
-                });
-        });
-
-
-        document.getElementById('order-now-button').addEventListener('click', async function() {
-            console.log("TOMBOL ORDER NOW DIKLIK");
-            const address = document.getElementById('address')?.value;
-            const paymentMethod = document.getElementById('payment_method')?.value;
-            const courierId = document.getElementById('courier').value;
-            const weight = document.getElementById('weight')?.value;
-            console.log(
-                "ONGKOS SAAT ORDER NOW =",
-                document.getElementById('hidden-shipping-cost')?.value
-            );
-            console.log(
-                "ISI HIDDEN SEBELUM PARSE =",
-                document.getElementById('hidden-shipping-cost')?.value
-            );
-            const ongkos = parseInt(document.getElementById('hidden-shipping-cost')?.value || 0);
-
-            if (!address) {
-                alert('Alamat pengiriman harus diisi!');
-                return;
-            }
-
-            if (!ongkos || ongkos <= 0) {
-                alert('Ongkos kirim belum dihitung!');
-                return;
-            }
-
-            if (!courierId) {
-                alert('Kurir belum dipilih. Pastikan elemen courier_id ada di halaman.');
-                return;
-            }
-
-            console.log({
-                address,
-                payment_method: paymentMethod,
-                courier_id: courierId,
-                shipping_cost: ongkos,
-                weight,
-            });
-
-            const subtotal = parseInt(
-                '{{ $totalPrice }}'); // Pastikan subtotal diambil dengan benar
-            const total = subtotal + ongkos;
-
-            console.log('Subtotal:', subtotal, 'Total:', total);
-
-            try {
-                console.log("DATA YANG DIKIRIM", {
-                    address,
-                    payment_method: paymentMethod,
-                    courier_id: courierId,
-                    shipping_cost: ongkos,
-                    weight,
-                    total_jumlah: total,
-                });
-                const response = await fetch('/checkout/store', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute(
-                            'content'),
-                    },
-                    body: JSON.stringify({
-                        address,
-                        payment_method: paymentMethod,
-                        courier_id: courierId,
-                        shipping_cost: ongkos,
-                        weight,
-                        total_jumlah: total,
-                        city_id: 501, // Hardcoded atau ambil dari elemen input
-                        destination: 419,
-                    }),
-                });
-
-                const text = await response.text();
-
-                console.log("RAW RESPONSE STORE:");
-                console.log(text);
-
-                const result = JSON.parse(text);
-
-                if (response.ok) {
-                    alert(result.message);
-                    window.location.href = '/my-orders';
-                } else {
-                    alert(result.message || 'Terjadi kesalahan.');
                 }
+
+                console.log('RajaOngkir:', data);
+
+                renderShippingOptions(data.results);
+
             } catch (error) {
                 console.error(error);
-                alert('Terjadi kesalahan saat memproses pesanan.');
+
+                document.getElementById('shipping-cost-result').innerHTML = `
+            <div class="alert alert-danger">
+                ${error.message}
+            </div>
+        `;
             }
         });
+
+        function renderShippingOptions(results) {
+
+            const container = document.getElementById('shipping-cost-result');
+
+            if (!results || results.length === 0) {
+                container.innerHTML = `
+            <div class="alert alert-warning">
+                Tidak ada layanan pengiriman yang tersedia.
+            </div>
+        `;
+
+                return;
+            }
+
+            let html = `
+        <h4>Pilih Layanan Pengiriman</h4>
+    `;
+
+            results.forEach((shipping, index) => {
+
+                const cost = Number(shipping.cost || 0);
+
+                html += `
+            <div class="shipping-option mb-2">
+                <label>
+                    <input
+                        type="radio"
+                        name="shipping_service_option"
+                        value="${shipping.service}"
+                        data-cost="${cost}"
+                        data-etd="${shipping.etd || ''}"
+                        data-description="${shipping.description || ''}"
+                        ${index === 0 ? 'checked' : ''}
+                    >
+
+                    <strong>${shipping.name}</strong>
+                    -
+                    <strong>${shipping.service}</strong>
+
+                    <br>
+
+                    <small>
+                        ${shipping.description || ''}
+                    </small>
+
+                    <br>
+
+                    <strong>
+                        Rp${cost.toLocaleString('id-ID')}
+                    </strong>
+
+                    <br>
+
+                    <small>
+                        Estimasi:
+                        ${shipping.etd || '-'}
+                    </small>
+                </label>
+            </div>
+        `;
+            });
+
+            container.innerHTML = html;
+
+            const firstOption = container.querySelector(
+                'input[name="shipping_service_option"]:checked'
+            );
+
+            if (firstOption) {
+                applyShippingOption(firstOption);
+            }
+
+            container
+                .querySelectorAll('input[name="shipping_service_option"]')
+                .forEach(input => {
+
+                    input.addEventListener('change', function() {
+                        applyShippingOption(this);
+                    });
+
+                });
+        }
+
+        function applyShippingOption(input) {
+
+            const cost = Number(input.dataset.cost || 0);
+
+            const service = input.value;
+            const etd = input.dataset.etd || '';
+            const description = input.dataset.description || '';
+
+            document.getElementById('selected-shipping-service').value =
+                service;
+
+            document.getElementById('selected-shipping-etd').value =
+                etd;
+
+            document.getElementById('selected-shipping-description').value =
+                description;
+
+            document.getElementById('hidden-shipping-cost').value =
+                cost;
+
+            document.getElementById('ongkos-kirim').innerText =
+                'Rp' + cost.toLocaleString('id-ID');
+
+            const subtotal = {{ $totalPrice }};
+
+            const total = subtotal + cost;
+
+            document.getElementById('total-price').innerText =
+                'Rp' + total.toLocaleString('id-ID');
+
+            document.getElementById('hidden-total').value =
+                total;
+        }
+
+        document.getElementById('order-now-button').addEventListener(
+            'click',
+            async function() {
+
+                const address =
+                    document.getElementById('address').value.trim();
+
+                const paymentMethod =
+                    document.getElementById('payment_method').value;
+
+                const provinceId =
+                    document.getElementById('province').value;
+
+                const cityId =
+                    document.getElementById('city').value;
+
+                const districtId =
+                    document.getElementById('district').value;
+
+                const courier =
+                    document.getElementById('courier').value;
+
+                const shippingService =
+                    document.getElementById('selected-shipping-service').value;
+
+                const shippingCost =
+                    parseInt(
+                        document.getElementById('hidden-shipping-cost').value || 0
+                    );
+
+                if (!address) {
+                    alert('Alamat pengiriman harus diisi.');
+                    return;
+                }
+
+                if (!provinceId || !cityId || !districtId) {
+                    alert('Lokasi pengiriman belum lengkap.');
+                    return;
+                }
+
+                if (!courier) {
+                    alert('Kurir belum dipilih.');
+                    return;
+                }
+
+                if (!shippingService) {
+                    alert('Silakan pilih layanan pengiriman.');
+                    return;
+                }
+
+                if (!weight || weight <= 0) {
+                    alert('Berat barang belum valid.');
+                    return;
+                }
+
+                if (!shippingCost || shippingCost <= 0) {
+                    alert('Ongkos kirim belum dihitung.');
+                    return;
+                }
+
+                if (!paymentMethod) {
+                    alert('Silakan pilih metode pembayaran.');
+                    return;
+                }
+
+                try {
+
+                    const response = await fetch(
+                        '{{ route('checkout.store') }}', {
+                            method: 'POST',
+
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json',
+
+                                'X-CSRF-TOKEN': document
+                                    .querySelector(
+                                        'meta[name="csrf-token"]'
+                                    )
+                                    .getAttribute('content'),
+                            },
+
+                            body: JSON.stringify({
+                                address: address,
+
+                                payment_method: paymentMethod,
+
+                                province_id: provinceId,
+
+                                city_id: cityId,
+
+                                district_id: districtId,
+
+                                courier: courier,
+
+                                shipping_service: shippingService,
+                            }),
+                        }
+                    );
+
+                    const result =
+                        await response.json();
+
+                    if (!response.ok) {
+                        throw new Error(
+                            result.message ||
+                            'Gagal membuat pesanan.'
+                        );
+                    }
+
+                    alert(result.message);
+
+                    window.location.href =
+                        '{{ route('orders.my') }}';
+
+                } catch (error) {
+
+                    console.error(
+                        'Order creation error:',
+                        error
+                    );
+
+                    alert(error.message);
+                }
+            }
+        );
     </script>
 
     <script>

@@ -56,6 +56,11 @@
                     @enderror
                 </div>
 
+                <div class="form-group">
+                    <label for="weight">Berat (gram)</label>
+                    <input type="number" name="weight" class="form-control" min="1" value="500" required>
+                </div>
+
                 <div class="row">
                     <div class="col-md-6">
                         <div class="form-group">

@@ -88,6 +88,12 @@
                     @enderror
                 </div>
 
+                <div class="form-group">
+                    <label for="weight">Berat (gram)</label>
+                    <input type="number" name="weight" value="{{ $product->weight }}" class="form-control" min="1"
+                        required>
+                </div>
+
                 {{-- Merk Produk --}}
                 <div class="form-group">
                     <label for="merk">Merk Produk</label>

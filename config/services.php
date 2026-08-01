@@ -37,7 +37,13 @@ return [
 
     'rajaongkir' => [
         'key' => env('RAJAONGKIR_API_KEY'),
-        'base_url' => 'https://api.rajaongkir.com/starter', // Pastikan menggunakan versi yang benar
+
+        'base_url' => env(
+            'RAJAONGKIR_BASE_URL',
+            'https://rajaongkir.komerce.id/api/v1'
+        ),
+
+        'origin_district_id' => env('RAJAONGKIR_ORIGIN_DISTRICT_ID'),
     ],
 
 

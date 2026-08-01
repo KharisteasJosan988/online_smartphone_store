@@ -107,6 +107,7 @@ class ProductController extends Controller
             'color' => 'required|string|max:255',
             'storage' => 'required|string|max:255',
             'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'weight' => 'required|integer|min:1',
             'category_id' => 'required|exists:categories,id',
         ]);
 
@@ -142,6 +143,8 @@ class ProductController extends Controller
             'category_id' => 'required|exists:categories,id',
             'description' => 'nullable',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // Tambahkan validasi untuk gambar, tapi opsional
+            'weight' => 'required|integer|min:1',
+            'stock' => 'required|integer',
         ]);
 
         $data = $request->all();

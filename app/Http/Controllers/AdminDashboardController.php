@@ -9,6 +9,7 @@ use App\Models\Order;
 use App\Models\Product;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class AdminDashboardController extends Controller
 {
@@ -24,10 +25,27 @@ class AdminDashboardController extends Controller
             ->take(10)
             ->get();
         $recentProducts = Product::latest()->take(5)->get();
-        $monthlyRecap = Order::selectRaw('MONTH(created_at) as month, SUM(total_jumlah) as total_sales')
-            ->groupBy('month')
-            ->orderBy('month')
-            ->get();
+
+
+        if (DB::getDriverName() === 'sqlite') {
+
+            $monthlyRecap = Order::selectRaw("
+        strftime('%m', created_at) as month,
+        SUM(total_jumlah) as total_sales
+    ")
+                ->groupBy('month')
+                ->orderBy('month')
+                ->get();
+        } else {
+
+            $monthlyRecap = Order::selectRaw("
+        MONTH(created_at) as month,
+        SUM(total_jumlah) as total_sales
+    ")
+                ->groupBy('month')
+                ->orderBy('month')
+                ->get();
+        }
 
         // Mengubah data menjadi format yang sesuai untuk grafik
         $salesData = [];

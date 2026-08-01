@@ -733,21 +733,35 @@
             const courier = document.getElementById('courier').value;
 
             if (!destination) {
-                alert('Silakan pilih kecamatan tujuan.');
-                return;
-            }
-
-            if (!weight || weight <= 0) {
-                alert('Berat barang harus lebih dari 0 gram.');
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Data Belum Lengkap',
+                    text: 'Silakan pilih kecamatan tujuan.',
+                    confirmButtonColor: '#D10024'
+                });
                 return;
             }
 
             if (!courier) {
-                alert('Silakan pilih kurir.');
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Data Belum Lengkap',
+                    text: 'Silakan pilih kurir.',
+                    confirmButtonColor: '#D10024'
+                });
                 return;
             }
 
             try {
+                Swal.fire({
+                    title: 'Menghitung Ongkir',
+                    html: 'Mohon tunggu sebentar...',
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
                 const response = await fetch('{{ route('shipping-cost') }}', {
                     method: 'POST',
                     headers: {
@@ -762,6 +776,7 @@
                 });
 
                 const data = await response.json();
+                Swal.close();
 
                 if (!response.ok || !data.success) {
                     throw new Error(
@@ -776,11 +791,12 @@
             } catch (error) {
                 console.error(error);
 
-                document.getElementById('shipping-cost-result').innerHTML = `
-            <div class="alert alert-danger">
-                ${error.message}
-            </div>
-        `;
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal Menghitung Ongkir',
+                    text: error.message,
+                    confirmButtonColor: '#D10024'
+                });
             }
         });
 
@@ -932,41 +948,76 @@
                     );
 
                 if (!address) {
-                    alert('Alamat pengiriman harus diisi.');
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Data Belum Lengkap',
+                        text: 'Alamat pengiriman harus diisi',
+                        confirmButtonColor: '#D10024'
+                    });
                     return;
                 }
 
                 if (!provinceId || !cityId || !districtId) {
-                    alert('Lokasi pengiriman belum lengkap.');
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Data Belum Lengkap',
+                        text: 'Lokasi pengiriman belum lengkap',
+                        confirmButtonColor: '#D10024'
+                    });
                     return;
                 }
 
                 if (!courier) {
-                    alert('Kurir belum dipilih.');
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Data Belum Lengkap',
+                        text: 'Kurir belum dipilih',
+                        confirmButtonColor: '#D10024'
+                    });
                     return;
                 }
 
                 if (!shippingService) {
-                    alert('Silakan pilih layanan pengiriman.');
-                    return;
-                }
-
-                if (!weight || weight <= 0) {
-                    alert('Berat barang belum valid.');
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Data Belum Lengkap',
+                        text: 'Silakan pilih layanan pengiriman',
+                        confirmButtonColor: '#D10024'
+                    });
                     return;
                 }
 
                 if (!shippingCost || shippingCost <= 0) {
-                    alert('Ongkos kirim belum dihitung.');
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Data Belum Lengkap',
+                        text: 'Ongkos kirim belum dihitung',
+                        confirmButtonColor: '#D10024'
+                    });
                     return;
                 }
 
                 if (!paymentMethod) {
-                    alert('Silakan pilih metode pembayaran.');
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Data Belum Lengkap',
+                        text: 'Silakan pilih metode pembayaran',
+                        confirmButtonColor: '#D10024'
+                    });
                     return;
                 }
 
                 try {
+
+                    Swal.fire({
+                        title: 'Memproses Pesanan',
+                        html: 'Mohon tunggu, pesanan sedang diproses...',
+                        allowOutsideClick: false,
+                        allowEscapeKey: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
 
                     const response = await fetch(
                         '{{ route('checkout.store') }}', {
@@ -1011,10 +1062,20 @@
                         );
                     }
 
-                    alert(result.message);
-
-                    window.location.href =
-                        '{{ route('orders.my') }}';
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Pesanan Berhasil!',
+                        html: `
+                            <p>${result.message}</p>
+                            <br>
+                            <strong>Nomor Pesanan</strong><br>
+                            ${result.order_number ?? '-'}
+                        `,
+                        confirmButtonText: 'Lihat Pesanan',
+                        confirmButtonColor: '#D10024'
+                    }).then(() => {
+                        window.location.href = '{{ route('orders.my') }}';
+                    });
 
                 } catch (error) {
 
@@ -1023,7 +1084,12 @@
                         error
                     );
 
-                    alert(error.message);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Pesanan Gagal',
+                        text: error.message,
+                        confirmButtonColor: '#D10024'
+                    });
                 }
             }
         );
@@ -1050,6 +1116,7 @@
             }
         });
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </body>
 
 </html>

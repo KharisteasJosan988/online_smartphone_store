@@ -251,10 +251,9 @@ class OrderController extends Controller
             );
 
             return response()->json([
-                'message' =>
-                'Pesanan berhasil dibuat.',
-                'order_id' =>
-                $order->id,
+                'message' => 'Pesanan berhasil dibuat.',
+                'order_id' => $order->id,
+                'order_number' => $order->no_pesanan,
             ], 200);
         } catch (\Throwable $e) {
 
